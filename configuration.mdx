@@ -1,0 +1,301 @@
+---
+title: 'Configuration'
+description: 'Configure the EduTec Backend for your environment'
+---
+
+## Application Configuration Overview
+
+The EduTec Backend uses Spring Boot's configuration system, with settings defined in `application.properties` located at `src/main/resources/application.properties`.
+
+## Default Configuration
+
+The base `application.properties` file contains minimal configuration:
+
+```properties src/main/resources/application.properties
+spring.application.name=edutec
+```
+
+<Note>
+  Most configuration is currently using Spring Boot defaults. You'll need to add database and other settings for production use.
+</Note>
+
+## Database Configuration
+
+### Development with H2 (In-Memory)
+
+For quick development without MySQL setup, use H2 in-memory database. Add to `application.properties`:
+
+```properties
+# H2 Database Configuration
+spring.datasource.url=jdbc:h2:mem:edutecdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+# H2 Console (Access at http://localhost:8080/h2-console)
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+```
+
+<Tip>
+  Access the H2 console at `http://localhost:8080/h2-console` with JDBC URL `jdbc:h2:mem:edutecdb` and username `sa`.
+</Tip>
+
+### Production with MySQL
+
+For MySQL database connection, configure:
+
+```properties
+# MySQL Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/edutec?useSSL=false&serverTimezone=UTC
+spring.datasource.username=your_mysql_username
+spring.datasource.password=your_mysql_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+### DDL Auto Modes
+
+The `spring.jpa.hibernate.ddl-auto` property controls database schema generation:
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `create` | Drop and recreate schema on startup | Initial development |
+| `create-drop` | Create on startup, drop on shutdown | Testing |
+| `update` | Update schema without data loss | Development |
+| `validate` | Only validate schema, no changes | Production |
+| `none` | No schema management | Production (with Flyway/Liquibase) |
+
+<Warning>
+  Never use `create` or `create-drop` in production as it will delete all data!
+</Warning>
+
+## JWT Configuration
+
+### Current Implementation
+
+The JWT secret key is currently hardcoded in `JwtService.java`:
+
+```java src/main/java/com/tecmilenio/edutec/security/JwtService.java
+private static final String SECRET_KEY = "12345678910111213141516171819200";
+```
+
+<Warning>
+  **Security Risk**: The JWT secret key is hardcoded in the source code. This should be moved to environment variables before deployment.
+</Warning>
+
+### Recommended: Environment Variable Configuration
+
+To properly secure the JWT secret, modify `JwtService.java` to read from configuration:
+
+1. Add to `application.properties`:
+
+```properties
+# JWT Configuration
+jwt.secret=${JWT_SECRET:defaultSecretKeyForDevelopmentOnly123456789}
+jwt.expiration=36000000
+```
+
+2. Update `JwtService.java` to use `@Value` annotation:
+
+```java
+@Value("${jwt.secret}")
+private String secretKey;
+
+@Value("${jwt.expiration}")
+private long expirationTime;
+```
+
+3. Set environment variable:
+
+<CodeGroup>
+```bash Linux/Mac
+export JWT_SECRET="your-secure-secret-key-at-least-256-bits"
+```
+
+```bash Windows (CMD)
+set JWT_SECRET=your-secure-secret-key-at-least-256-bits
+```
+
+```bash Windows (PowerShell)
+$env:JWT_SECRET="your-secure-secret-key-at-least-256-bits"
+```
+</CodeGroup>
+
+<Tip>
+  Generate a secure random key: `openssl rand -base64 32`
+</Tip>
+
+## Server Configuration
+
+Configure the embedded Tomcat server:
+
+```properties
+# Server Configuration
+server.port=8080
+server.servlet.context-path=/api
+
+# Logging
+logging.level.root=INFO
+logging.level.com.tecmilenio.edutec=DEBUG
+logging.level.org.springframework.web=DEBUG
+logging.level.org.hibernate.SQL=DEBUG
+```
+
+## Spring Profiles
+
+Use Spring profiles to manage different environments:
+
+### Create Profile-Specific Files
+
+**`application-dev.properties`** (Development):
+```properties
+spring.datasource.url=jdbc:h2:mem:edutecdb
+spring.h2.console.enabled=true
+spring.jpa.show-sql=true
+logging.level.com.tecmilenio.edutec=DEBUG
+```
+
+**`application-prod.properties`** (Production):
+```properties
+spring.datasource.url=jdbc:mysql://prod-db-server:3306/edutec
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+logging.level.root=WARN
+```
+
+### Activate Profiles
+
+<CodeGroup>
+```bash Command Line
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+```bash Environment Variable
+export SPRING_PROFILES_ACTIVE=dev
+./mvnw spring-boot:run
+```
+
+```properties application.properties
+spring.profiles.active=dev
+```
+</CodeGroup>
+
+## Mail Configuration (Optional)
+
+The project includes Spring Mail. To enable email functionality:
+
+```properties
+# Mail Configuration
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+
+## Session Management
+
+The project uses JDBC session management:
+
+```properties
+# Session Configuration
+spring.session.store-type=jdbc
+spring.session.jdbc.initialize-schema=always
+spring.session.timeout=1800s
+```
+
+## Complete Example Configuration
+
+Here's a complete `application.properties` for local development:
+
+```properties
+# Application
+spring.application.name=edutec
+spring.profiles.active=dev
+
+# Server
+server.port=8080
+
+# H2 Database
+spring.datasource.url=jdbc:h2:mem:edutecdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA/Hibernate
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# H2 Console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# JWT
+jwt.secret=${JWT_SECRET:defaultSecretKeyForDevelopmentOnly123456789}
+jwt.expiration=36000000
+
+# Session
+spring.session.store-type=jdbc
+
+# Logging
+logging.level.root=INFO
+logging.level.com.tecmilenio.edutec=DEBUG
+```
+
+## Environment Variables Best Practices
+
+<Steps>
+  <Step title="Never commit secrets">
+    Use `.gitignore` to exclude files containing sensitive data:
+    ```
+    .env
+application-prod.properties
+    **/application-local.properties
+    ```
+  </Step>
+
+  <Step title="Use environment variables for sensitive data">
+    - Database passwords: `${DB_PASSWORD}`
+    - JWT secrets: `${JWT_SECRET}`
+    - API keys: `${API_KEY}`
+  </Step>
+
+  <Step title="Document required variables">
+    Create a `.env.example` file with placeholder values:
+    ```bash
+    JWT_SECRET=your-secret-here
+    DB_PASSWORD=your-password-here
+    ```
+  </Step>
+
+  <Step title="Use different values per environment">
+    Development, staging, and production should have separate credentials.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Running Locally" icon="play" href="/running-locally">
+    Start the application with your configuration
+  </Card>
+  <Card title="API Reference" icon="book" href="/api/auth/login">
+    Explore available API endpoints
+  </Card>
+</CardGroup>

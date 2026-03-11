@@ -1,0 +1,132 @@
+---
+title: Introduction
+description: Overview of the EduTec Backend system for educational administration
+---
+
+## Welcome to EduTec Backend
+
+EduTec is a comprehensive backend system for educational administration, designed to provide a secure and reliable foundation for managing students, teachers, and administrative operations in educational institutions.
+
+<Note>
+  EduTec is currently in active development as an academic project focused on building modern educational applications with enterprise-grade technology.
+</Note>
+
+## What is EduTec?
+
+EduTec Backend is a Spring Boot-based REST API that serves as the core system for a full-featured educational portal. It handles authentication, data management, and secure communication between the frontend and database layers.
+
+## Who is it for?
+
+EduTec Backend is designed to serve three primary user roles:
+
+<CardGroup cols={3}>
+  <Card title="Students" icon="graduation-cap">
+    Access course enrollment, view grades, and manage academic information
+  </Card>
+  <Card title="Teachers" icon="chalkboard-teacher">
+    Manage course content, grade students, and communicate with administration
+  </Card>
+  <Card title="Administrators" icon="user-shield">
+    Oversee system operations, manage users, and maintain academic records
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Current Features
+
+- **JWT Authentication**: Secure token-based authentication system for user login
+- **User Management**: Complete user model with database persistence
+- **REST API**: Clean and well-documented RESTful endpoints
+- **MySQL Integration**: Robust data storage with Spring Data JPA
+
+### In Development
+
+<Note>
+  The following features are actively being developed:
+</Note>
+
+- **User Registration**: Complete registration workflow for new users
+- **Enrollment System**: Course enrollment management for students
+- **Grade Consultation**: Academic performance tracking and reporting
+- **Role-Based Access Control**: Fine-grained permission system for different user types
+
+## Technology Stack
+
+EduTec Backend is built with proven, enterprise-ready technologies:
+
+| Component | Technology | Version |
+|-----------|------------|---------|
+| Language | Java | 8 |
+| Framework | Spring Boot | 2.6.6 |
+| ORM | Spring Data JPA | 2.6.6 |
+| Database | MySQL | 8.0.19 |
+| Security | JWT (jjwt) | 0.11.5 |
+| Build Tool | Maven | 3.x |
+
+## Project Objectives
+
+The EduTec Backend system is designed to deliver:
+
+<CardGroup cols={2}>
+  <Card title="Secure Authentication" icon="lock">
+    Role-based authentication system with JWT tokens for students, teachers, and administrators
+  </Card>
+  <Card title="Enrollment Management" icon="clipboard-list">
+    Complete system for managing course enrollments and academic schedules
+  </Card>
+  <Card title="Academic Information" icon="book">
+    Comprehensive storage and retrieval of academic records and grades
+  </Card>
+  <Card title="Frontend Integration" icon="plug">
+    Secure REST API communication with frontend applications
+  </Card>
+</CardGroup>
+
+## Non-Functional Requirements
+
+EduTec is built with the following principles:
+
+- **Security**: Robust data protection and secure credential management
+- **Performance**: Optimized response times for all API endpoints
+- **Maintainability**: Clean, well-documented code following best practices
+- **Scalability**: Architecture designed for growth and increased user load
+- **Availability**: Reliable system with minimal downtime
+- **API Clarity**: Well-structured REST API following industry standards
+- **Documentation**: Comprehensive documentation for developers and users
+
+## Current Status
+
+<Warning>
+  EduTec Backend is in the **initial development phase**. The authentication and registration systems are currently being implemented.
+</Warning>
+
+### Roadmap
+
+**Phase 1** (Current)
+- JWT authentication implementation
+- User model and database schema
+- Login endpoint development
+
+**Phase 2** (Planned)
+- User registration system
+- Email verification
+- Password reset functionality
+
+**Phase 3** (Planned)
+- Course enrollment system
+- Grade management
+- Teacher and admin dashboards
+
+**Phase 4** (Future)
+- Advanced reporting
+- Notifications system
+- Mobile API optimization
+
+## Project Context
+
+This project is part of an academic initiative focused on developing modern educational applications. It serves as a learning platform for implementing best practices in backend development, security, and API design.
+
+## Next Steps
+
+Ready to get started? Check out the [Quickstart Guide](/quickstart) to set up your development environment and run the application locally.

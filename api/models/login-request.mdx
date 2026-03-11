@@ -1,0 +1,206 @@
+---
+title: "LoginRequest DTO"
+description: "Data Transfer Object for user authentication requests"
+---
+
+## Overview
+
+The `LoginRequest` class is a Data Transfer Object (DTO) used to encapsulate user credentials during the authentication process. It provides a clean way to transfer login data from the client to the authentication endpoint.
+
+## Purpose
+
+This DTO is specifically designed for:
+- Receiving login credentials from client applications
+- Validating user authentication requests
+- Decoupling the API layer from the persistence layer
+- Providing a type-safe contract for login operations
+
+## Fields
+
+<ResponseField name="username" type="String" required>
+  The username credential for authentication. This should match a unique username in the User model.
+  
+  **Usage**: Identifies the user attempting to log in
+</ResponseField>
+
+<ResponseField name="password" type="String" required>
+  The password credential for authentication. Should be sent as plain text over HTTPS and will be validated against the hashed password in the database.
+  
+  **Usage**: Verifies the user's identity
+  
+  <Warning>
+    Always transmit passwords over HTTPS to ensure secure communication. The password will be compared against the hashed version stored in the database.
+  </Warning>
+</ResponseField>
+
+## Methods
+
+### Constructor
+
+**`LoginRequest()`**
+- No-argument constructor
+- Required by Spring Framework for object instantiation during request deserialization
+- Allows Spring to create an empty object and populate it using setters
+
+### Getters and Setters
+
+**`String getUsername()`**
+- Returns the username field value
+- Used by the authentication service to retrieve the username
+
+**`void setUsername(String username)`**
+- Sets the username field value
+- Called by Spring during JSON deserialization
+
+**`String getPassword()`**
+- Returns the password field value
+- Used by the authentication service to retrieve the password
+
+**`void setPassword(String password)`**
+- Sets the password field value
+- Called by Spring during JSON deserialization
+
+## Used By
+
+This DTO is used by the following endpoints:
+
+- **[POST /auth/login](/api/auth/login)** - Main authentication endpoint that accepts LoginRequest and returns a JWT token
+
+## JSON Format
+
+When sending a login request, the JSON payload should follow this structure:
+
+```json
+{
+  "username": "john.doe",
+  "password": "userPassword123"
+}
+```
+
+## Usage Example
+
+### Client-Side Request
+
+```javascript
+fetch('http://localhost:8080/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    username: 'john.doe',
+    password: 'userPassword123'
+  })
+})
+.then(response => response.json())
+.then(data => console.log('Token:', data.token));
+```
+
+### Server-Side Usage
+
+```java
+@PostMapping("/login")
+public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    // Spring automatically deserializes JSON to LoginRequest
+    String username = loginRequest.getUsername();
+    String password = loginRequest.getPassword();
+    
+    // Authenticate user and generate token
+    String token = authenticationService.authenticate(username, password);
+    
+    return ResponseEntity.ok(new AuthResponse(token));
+}
+```
+
+## Related Models
+
+- [User Model](/api/models/user) - The JPA entity used to validate credentials
+
+## Related Endpoints
+
+- [POST /auth/login](/api/auth/login) - Authenticates users using this DTO
+
+## Source Code
+
+```java
+package com.tecmilenio.edutec.dto;
+
+public class LoginRequest {
+    private String username;
+    private String password;
+
+    // Constructor vacío (necesario para que Spring pueda crear el objeto)
+    public LoginRequest() {
+    }
+
+    // Getter para username
+    public String getUsername() {
+        return username;
+    }
+
+    // Setter para username
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    // Getter para password
+    public String getPassword() {
+        return password;
+    }
+
+    // Setter para password
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+}
+```
+
+## Design Pattern
+
+This class follows the **Data Transfer Object (DTO)** pattern, which:
+- Separates API contracts from domain models
+- Reduces coupling between layers
+- Provides flexibility to change internal models without affecting the API
+- Improves security by limiting exposed data
+
+## Why Not Use Lombok?
+
+Unlike the User model, this DTO uses traditional getters and setters instead of Lombok annotations. This approach:
+- Makes the code more explicit and readable for simple DTOs
+- Avoids additional dependencies for straightforward classes
+- Provides clear visibility of all methods
+- Is suitable for classes with minimal fields
+
+## Security Best Practices
+
+<Warning>
+  **Important Security Considerations:**
+  
+  1. **HTTPS Only**: Always transmit LoginRequest over HTTPS to prevent credential interception
+  2. **No Logging**: Never log the password field, even for debugging purposes
+  3. **Rate Limiting**: Implement rate limiting on login endpoints to prevent brute force attacks
+  4. **Input Validation**: Add validation annotations to ensure username and password are not empty
+  5. **CORS Configuration**: Properly configure CORS to control which origins can access the login endpoint
+</Warning>
+
+## Validation Enhancement
+
+Consider adding validation annotations for improved security:
+
+```java
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+public class LoginRequest {
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    private String username;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
+    
+    // ... getters and setters
+}
+```

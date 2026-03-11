@@ -1,0 +1,725 @@
+---
+title: Database
+description: Database configuration, JPA entities, and data persistence in EduTec Backend
+---
+
+## Overview
+
+EduTec Backend uses **Spring Data JPA** with **Hibernate** as the ORM (Object-Relational Mapping) provider. The application supports multiple database systems, with **MySQL 8.0.19** as the primary production database.
+
+<Info>
+The flexible database architecture allows development with H2 (in-memory) while deploying to MySQL, Oracle, MariaDB, or SQL Server in production without code changes.
+</Info>
+
+## Supported Databases
+
+The project includes JDBC drivers for multiple database systems:
+
+<Tabs>
+  <Tab title="MySQL">
+    **Version:** 8.0.19
+    
+    **Status:** Primary production database
+    
+    ```xml
+    <!-- pom.xml:78-82 -->
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.19</version>
+    </dependency>
+    ```
+    
+    **Connection URL Pattern:**
+    ```properties
+    spring.datasource.url=jdbc:mysql://localhost:3306/edutec
+    spring.datasource.username=root
+    spring.datasource.password=yourpassword
+    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+    ```
+    
+    <Note>
+    MySQL 8.0+ requires the `cj` package in the driver class name. The older `com.mysql.jdbc.Driver` is deprecated.
+    </Note>
+  </Tab>
+  
+  <Tab title="H2 (In-Memory)">
+    **Scope:** Runtime (development/testing)
+    
+    **Use Case:** Fast local development without external database setup
+    
+    ```xml
+    <!-- pom.xml:58-61 -->
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    ```
+    
+    **Configuration Example:**
+    ```properties
+    spring.datasource.url=jdbc:h2:mem:testdb
+    spring.datasource.driver-class-name=org.h2.Driver
+    spring.h2.console.enabled=true
+    ```
+    
+    Access H2 console at: `http://localhost:8080/h2-console`
+  </Tab>
+  
+  <Tab title="MariaDB">
+    **Status:** MySQL-compatible alternative
+    
+    ```xml
+    <!-- pom.xml:83-87 -->
+    <dependency>
+        <groupId>org.mariadb.jdbc</groupId>
+        <artifactId>mariadb-java-client</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    ```
+    
+    **Connection URL Pattern:**
+    ```properties
+    spring.datasource.url=jdbc:mariadb://localhost:3306/edutec
+    spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+    ```
+  </Tab>
+  
+  <Tab title="Oracle">
+    **Version:** ojdbc8 21.5.0.0
+    
+    **Use Case:** Enterprise deployments
+    
+    ```xml
+    <!-- pom.xml:68-72 -->
+    <dependency>
+        <groupId>com.oracle.database.jdbc</groupId>
+        <artifactId>ojdbc8</artifactId>
+        <version>21.5.0.0</version>
+    </dependency>
+    ```
+    
+    **Connection URL Pattern:**
+    ```properties
+    spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+    spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+    ```
+  </Tab>
+  
+  <Tab title="Microsoft SQL Server">
+    **Scope:** Runtime
+    
+    ```xml
+    <!-- pom.xml:62-66 -->
+    <dependency>
+        <groupId>com.microsoft.sqlserver</groupId>
+        <artifactId>mssql-jdbc</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    ```
+    
+    **Connection URL Pattern:**
+    ```properties
+    spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=edutec
+    spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+    ```
+  </Tab>
+</Tabs>
+
+## JPA Configuration
+
+The application uses Spring Data JPA for database operations:
+
+```xml
+<!-- pom.xml:26-29 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+```
+
+This starter includes:
+- **Spring Data JPA** - Repository abstraction layer
+- **Hibernate Core** - JPA implementation
+- **Spring Transaction Management** - Declarative transaction support
+- **JDBC Connection Pooling** - HikariCP (default in Spring Boot 2.x)
+
+## Entity Model: User
+
+The `User` entity represents the core authentication and user management table.
+
+### Entity Definition
+
+```java
+// src/main/java/com/tecmilenio/edutec/model/User.java:1-25
+package com.tecmilenio.edutec.model;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "usuarios")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+}
+```
+
+### Annotations Explained
+
+<Accordion title="@Entity">
+  **Purpose:** Marks this class as a JPA entity that maps to a database table
+  
+  **Effect:** Hibernate will manage instances of this class and persist them to the database
+  
+  ```java
+  @Entity
+  public class User { }
+  ```
+</Accordion>
+
+<Accordion title="@Table(name = 'usuarios')">
+  **Purpose:** Specifies the database table name
+  
+  **Default:** Without this annotation, the table name would be `user` (class name in lowercase)
+  
+  **Custom Name:** Maps to the `usuarios` table in the database
+  
+  ```java
+  @Table(name = "usuarios")
+  ```
+  
+  <Note>
+  Using a Spanish table name (`usuarios`) indicates this may be for a Spanish-speaking user base or legacy database naming conventions.
+  </Note>
+</Accordion>
+
+<Accordion title="Lombok Annotations">
+  **@Data** - Generates:
+  - Getters for all fields
+  - Setters for all non-final fields
+  - `toString()` method
+  - `equals()` and `hashCode()` methods
+  - Required arguments constructor
+  
+  **@NoArgsConstructor** - Generates a no-argument constructor (required by JPA)
+  
+  **@AllArgsConstructor** - Generates a constructor with all fields as parameters
+  
+  ```java
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public class User { }
+  ```
+  
+  <Info>
+  These Lombok annotations dramatically reduce boilerplate code. Without them, you would need to manually write ~50 lines of getters, setters, and other methods.
+  </Info>
+</Accordion>
+
+<Accordion title="@Id and @GeneratedValue">
+  **@Id** - Marks this field as the primary key
+  
+  **@GeneratedValue(strategy = GenerationType.IDENTITY)**:
+  - Delegates primary key generation to the database
+  - Uses AUTO_INCREMENT (MySQL/MariaDB) or IDENTITY columns (SQL Server)
+  - Database generates the ID when inserting new records
+  
+  ```java
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  ```
+  
+  **Alternative Strategies:**
+  - `AUTO` - JPA provider chooses the strategy
+  - `SEQUENCE` - Uses database sequences (Oracle, PostgreSQL)
+  - `TABLE` - Uses a separate table to generate IDs
+  - `UUID` - Generates UUIDs (requires custom generator)
+</Accordion>
+
+<Accordion title="@Column Constraints">
+  **Username Field:**
+  ```java
+  @Column(nullable = false, unique = true)
+  private String username;
+  ```
+  - `nullable = false`: NOT NULL constraint - username is required
+  - `unique = true`: UNIQUE constraint - no duplicate usernames
+  
+  **Password Field:**
+  ```java
+  @Column(nullable = false)
+  private String password;
+  ```
+  - `nullable = false`: Password is required
+  
+  <Warning>
+  The password field stores plain text in the current implementation. Always hash passwords using BCrypt before storing them in production.
+  </Warning>
+</Accordion>
+
+### Generated Database Schema
+
+Hibernate will generate the following SQL DDL:
+
+```sql
+CREATE TABLE usuarios (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE INDEX idx_username ON usuarios(username);
+```
+
+**Column Types:**
+- `id`: BIGINT (maps from Java `Long`)
+- `username`: VARCHAR(255) (default String length)
+- `password`: VARCHAR(255)
+
+<Info>
+Hibernate automatically creates an index on the `username` column due to the `unique = true` constraint, optimizing login queries.
+</Info>
+
+## Hibernate Configuration
+
+The project includes several Hibernate extensions and utilities:
+
+### Hibernate Core Dependencies
+
+<Accordion title="Hibernate Agroal (5.4.30.Final)">
+  **Purpose:** Connection pool integration
+  
+  ```xml
+  <!-- pom.xml:131-135 -->
+  <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-agroal</artifactId>
+      <version>5.4.30.Final</version>
+      <type>pom</type>
+  </dependency>
+  ```
+  
+  **Agroal** is a modern connection pool that provides:
+  - Fast connection acquisition
+  - Leak detection
+  - Connection validation
+  - Metrics and monitoring
+</Accordion>
+
+<Accordion title="Hibernate Search (5.11.8.Final)">
+  **Purpose:** Full-text search capabilities using Apache Lucene
+  
+  ```xml
+  <!-- pom.xml:137-141 -->
+  <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-search-orm</artifactId>
+      <version>5.11.8.Final</version>
+  </dependency>
+  ```
+  
+  **Use Cases:**
+  - Search users by name or email
+  - Autocomplete functionality
+  - Advanced text queries (fuzzy matching, wildcards)
+  
+  **Example Usage:**
+  ```java
+  @Entity
+  @Indexed
+  public class User {
+      @Field(analyze = Analyze.YES)
+      private String username;
+  }
+  ```
+</Accordion>
+
+<Accordion title="Hibernate Validator (7.0.1.Final)">
+  **Purpose:** Bean validation (JSR 380 implementation)
+  
+  ```xml
+  <!-- pom.xml:143-147 -->
+  <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>7.0.1.Final</version>
+  </dependency>
+  ```
+  
+  **Example Validations:**
+  ```java
+  public class User {
+      @NotBlank
+      @Size(min = 3, max = 50)
+      private String username;
+      
+      @Email
+      private String email;
+      
+      @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$")
+      private String password;
+  }
+  ```
+</Accordion>
+
+<Accordion title="Hibernate Envers (5.5.0.Final)">
+  **Purpose:** Entity auditing and versioning
+  
+  ```xml
+  <!-- pom.xml:149-153 -->
+  <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-envers</artifactId>
+      <version>5.5.0.Final</version>
+  </dependency>
+  ```
+  
+  **Spring Data Integration:**
+  ```xml
+  <!-- pom.xml:155-159 -->
+  <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-envers</artifactId>
+      <version>2.5.1</version>
+  </dependency>
+  ```
+  
+  **Features:**
+  - Track all changes to entities
+  - Query historical data
+  - Audit trail compliance
+  - Rollback capability
+  
+  **Enable Auditing:**
+  ```java
+  @Entity
+  @Audited
+  public class User {
+      // Envers will create a usuarios_AUD table automatically
+  }
+  ```
+  
+  <Info>
+  Envers creates shadow audit tables (e.g., `usuarios_AUD`) that store historical versions of each entity, perfect for compliance requirements.
+  </Info>
+</Accordion>
+
+## Database Configuration
+
+Current configuration in `application.properties`:
+
+```properties
+# src/main/resources/application.properties:1
+spring.application.name=edutec
+```
+
+<Warning>
+**Missing Database Configuration**
+
+The `application.properties` file only contains the application name. You must add database connection properties before running the application:
+
+```properties
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/edutec
+spring.datasource.username=root
+spring.datasource.password=yourpassword
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA/Hibernate Properties
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Connection Pool Settings
+spring.datasource.hikari.maximum-pool-size=10
+spring.datasource.hikari.minimum-idle=5
+spring.datasource.hikari.connection-timeout=30000
+```
+</Warning>
+
+### Configuration Properties Explained
+
+<Tabs>
+  <Tab title="spring.jpa.hibernate.ddl-auto">
+    Controls automatic schema management:
+    
+    - **`none`** - No automatic schema operations
+    - **`validate`** - Validate schema matches entities (safe for production)
+    - **`update`** - Update schema to match entities (adds columns/tables, never drops)
+    - **`create`** - Drop and recreate schema on startup
+    - **`create-drop`** - Create on startup, drop on shutdown
+    
+    <Note>
+    Use `validate` or `none` in production with proper database migration tools like Flyway or Liquibase.
+    </Note>
+  </Tab>
+  
+  <Tab title="spring.jpa.show-sql">
+    **Purpose:** Log SQL statements to console
+    
+    ```properties
+    spring.jpa.show-sql=true
+    ```
+    
+    **Output Example:**
+    ```sql
+    Hibernate: select user0_.id, user0_.username, user0_.password 
+               from usuarios user0_ 
+               where user0_.username=?
+    ```
+    
+    Useful for development and debugging, but disable in production for performance.
+  </Tab>
+  
+  <Tab title="Hibernate Dialect">
+    **Purpose:** SQL dialect for your database vendor
+    
+    **MySQL 8:**
+    ```properties
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+    ```
+    
+    **Other Dialects:**
+    - `org.hibernate.dialect.MariaDBDialect`
+    - `org.hibernate.dialect.Oracle12cDialect`
+    - `org.hibernate.dialect.SQLServer2012Dialect`
+    - `org.hibernate.dialect.H2Dialect`
+    
+    <Info>
+    Hibernate usually auto-detects the dialect, but explicit configuration ensures correct SQL generation.
+    </Info>
+  </Tab>
+  
+  <Tab title="HikariCP Settings">
+    **Purpose:** Connection pool configuration (HikariCP is the default in Spring Boot 2.x)
+    
+    ```properties
+    spring.datasource.hikari.maximum-pool-size=10
+    spring.datasource.hikari.minimum-idle=5
+    spring.datasource.hikari.connection-timeout=30000
+    spring.datasource.hikari.idle-timeout=600000
+    spring.datasource.hikari.max-lifetime=1800000
+    ```
+    
+    **Recommended Values:**
+    - `maximum-pool-size`: (CPU cores * 2) + effective_spindle_count
+    - `minimum-idle`: 5-10 connections
+    - `connection-timeout`: 30 seconds
+  </Tab>
+</Tabs>
+
+## Data Access Pattern
+
+While not shown in the current codebase, typical Spring Data JPA usage would include:
+
+### Repository Interface
+
+```java
+package com.tecmilenio.edutec.repository;
+
+import com.tecmilenio.edutec.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
+    boolean existsByUsername(String username);
+}
+```
+
+**Spring Data JPA automatically implements:**
+- `save(User user)` - Insert or update
+- `findById(Long id)` - Find by primary key
+- `findAll()` - Get all users
+- `deleteById(Long id)` - Delete by primary key
+- `count()` - Count total users
+
+**Custom query methods:**
+- `findByUsername(String username)` - Find user by username
+- `existsByUsername(String username)` - Check if username exists
+
+<Info>
+Spring Data JPA derives the SQL query from the method name. No implementation code needed!
+</Info>
+
+### Service Layer Example
+
+```java
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Transactional
+    public User createUser(String username, String rawPassword) {
+        if (userRepository.existsByUsername(username)) {
+            throw new DuplicateUserException("Username already exists");
+        }
+        
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        
+        return userRepository.save(user);
+    }
+    
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+}
+```
+
+## Migration Strategy
+
+### Development Phase
+
+For development, use Hibernate's automatic schema generation:
+
+```properties
+spring.jpa.hibernate.ddl-auto=update
+```
+
+### Production Deployment
+
+For production, use database migration tools:
+
+<Tabs>
+  <Tab title="Flyway">
+    Add to `pom.xml`:
+    ```xml
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+    </dependency>
+    ```
+    
+    Create migrations in `src/main/resources/db/migration/`:
+    ```sql
+    -- V1__create_usuarios_table.sql
+    CREATE TABLE usuarios (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    );
+    ```
+    
+    Configure:
+    ```properties
+    spring.jpa.hibernate.ddl-auto=validate
+    spring.flyway.enabled=true
+    ```
+  </Tab>
+  
+  <Tab title="Liquibase">
+    Add to `pom.xml`:
+    ```xml
+    <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
+    </dependency>
+    ```
+    
+    Create changelog in `src/main/resources/db/changelog/`:
+    ```xml
+    <!-- db-changelog-master.xml -->
+    <databaseChangeLog>
+        <changeSet id="1" author="developer">
+            <createTable tableName="usuarios">
+                <column name="id" type="BIGINT" autoIncrement="true">
+                    <constraints primaryKey="true"/>
+                </column>
+                <column name="username" type="VARCHAR(255)">
+                    <constraints nullable="false" unique="true"/>
+                </column>
+                <column name="password" type="VARCHAR(255)">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+        </changeSet>
+    </databaseChangeLog>
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+Never use `spring.jpa.hibernate.ddl-auto=update` or `create` in production. Always use proper migration tools for schema changes.
+</Warning>
+
+## Best Practices
+
+### Entity Design
+
+1. **Always use `@Column(nullable = false)` for required fields** - Database constraints are the last line of defense
+
+2. **Add indexes for frequently queried columns:**
+   ```java
+   @Table(name = "usuarios", indexes = {
+       @Index(name = "idx_username", columnList = "username"),
+       @Index(name = "idx_email", columnList = "email")
+   })
+   ```
+
+3. **Use appropriate field types:**
+   - `Long` for IDs (not `Integer`)
+   - `LocalDateTime` for timestamps (not `Date`)
+   - `BigDecimal` for currency (not `double`)
+
+4. **Add timestamps for auditing:**
+   ```java
+   @CreatedDate
+   private LocalDateTime createdAt;
+   
+   @LastModifiedDate
+   private LocalDateTime updatedAt;
+   ```
+
+### Performance Optimization
+
+1. **Enable second-level cache:**
+   ```properties
+   spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+   spring.jpa.properties.hibernate.cache.region.factory_class=org.hibernate.cache.jcache.JCacheRegionFactory
+   ```
+
+2. **Use batch inserts:**
+   ```properties
+   spring.jpa.properties.hibernate.jdbc.batch_size=20
+   spring.jpa.properties.hibernate.order_inserts=true
+   ```
+
+3. **Configure connection pool properly:**
+   - Match pool size to your workload
+   - Monitor connection usage
+   - Set appropriate timeouts
+
+## Next Steps
+
+- [Authentication](/authentication) - Integrate user authentication with database validation
+- [Architecture](/architecture) - Understand how the repository layer fits into the overall system
+- [API Reference](/api/auth/login) - Explore endpoints that interact with the database

@@ -1,97 +1,152 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "EduTec Backend"
+description: "Sistema backend para la administración educativa con autenticación JWT, gestión de usuarios, inscripciones y consulta académica"
 ---
 
-## Setting up
+## Sistema de Administración Escolar
 
-Get your documentation site up and running in minutes.
+EduTec Backend es un sistema tipo portal educativo desarrollado con Spring Boot que proporciona la lógica del sistema, autenticación segura y manejo de datos para instituciones educativas.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
+<CardGroup cols={2}>
   <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
+    title="Inicio Rápido"
+    icon="rocket"
+    href="/quickstart"
   >
-    Edit your docs locally and preview them in real time.
+    Configure y ejecute el backend en minutos
   </Card>
   <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
+    title="Autenticación JWT"
+    icon="shield-halved"
+    href="/authentication"
   >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+    Sistema de autenticación seguro con tokens JWT
   </Card>
   <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
+    title="API Reference"
     icon="code"
-    href="/essentials/code"
+    href="/api/auth/login"
   >
-    Add sample code to demonstrate how to use your product.
+    Documentación completa de endpoints REST
   </Card>
   <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
+    title="Arquitectura"
+    icon="diagram-project"
+    href="/architecture"
   >
-    Display images and other media.
+    Entienda la estructura y componentes del sistema
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+</CardGroup>
 
-## Need inspiration?
+## Características Principales
+
+<CardGroup cols={3}>
+  <Card
+    title="Autenticación JWT"
+    icon="key"
+  >
+    Sistema de autenticación robusto con JSON Web Tokens para seguridad de endpoints
+  </Card>
+  <Card
+    title="Gestión de Usuarios"
+    icon="users"
+  >
+    Control de acceso basado en roles para estudiantes, profesores y administradores
+  </Card>
+  <Card
+    title="Multi-Base de Datos"
+    icon="database"
+  >
+    Soporte para MySQL, PostgreSQL, Oracle, H2 y MariaDB
+  </Card>
+  <Card
+    title="API RESTful"
+    icon="plug"
+  >
+    Interfaz de programación clara y documentada con Swagger
+  </Card>
+  <Card
+    title="Spring Boot"
+    icon="leaf"
+  >
+    Construido con Spring Boot 2.6 y Java 8 para rendimiento y escalabilidad
+  </Card>
+  <Card
+    title="Inscripciones"
+    icon="clipboard-list"
+  >
+    Sistema de gestión de inscripciones estudiantiles (en desarrollo)
+  </Card>
+</CardGroup>
+
+## Stack Tecnológico
+
+El backend está construido con tecnologías empresariales robustas:
+
+- **Lenguaje**: Java 8
+- **Framework**: Spring Boot 2.6.6
+- **Persistencia**: Spring Data JPA + Hibernate
+- **Seguridad**: JWT (JSON Web Tokens)
+- **Base de Datos**: MySQL (producción), H2 (desarrollo)
+- **Build Tool**: Maven
+- **Documentación API**: Swagger/Springfox
+
+## Casos de Uso
+
+<AccordionGroup>
+  <Accordion title="Autenticación de Usuarios">
+    El sistema permite a estudiantes, profesores y administradores autenticarse de forma segura mediante credenciales, recibiendo un token JWT válido para acceder a recursos protegidos.
+  </Accordion>
+  <Accordion title="Gestión de Inscripciones">
+    Los estudiantes pueden inscribirse en cursos, mientras que los administradores gestionan las matrículas y asignaciones (funcionalidad en desarrollo).
+  </Accordion>
+  <Accordion title="Consulta de Información Académica">
+    Acceso a calificaciones, horarios y datos académicos de forma segura y estructurada a través de la API REST.
+  </Accordion>
+  <Accordion title="Comunicación Frontend-Backend">
+    Interfaz RESTful que permite la comunicación fluida con aplicaciones frontend web o móviles.
+  </Accordion>
+</AccordionGroup>
+
+## Primeros Pasos
+
+<Steps>
+  <Step title="Revisa los Requisitos">
+    Asegúrate de tener Java 8+, Maven 3.6+ y MySQL instalados en tu sistema.
+  </Step>
+  <Step title="Clona el Repositorio">
+    Descarga el código fuente desde GitHub y configura las variables de entorno.
+  </Step>
+  <Step title="Configura la Base de Datos">
+    Crea la base de datos MySQL y actualiza `application.properties` con tus credenciales.
+  </Step>
+  <Step title="Ejecuta la Aplicación">
+    Usa Maven para compilar y ejecutar el servidor Spring Boot.
+  </Step>
+</Steps>
 
 <Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
+  title="Guía de Configuración Completa"
+  icon="book-open"
+  href="/setup"
 >
-  Browse our showcase of exceptional documentation sites.
+  Sigue nuestra guía detallada para configurar el entorno de desarrollo
 </Card>
+
+## Estado del Proyecto
+
+Este proyecto se encuentra en **fase inicial de desarrollo** como parte de un trabajo académico enfocado al desarrollo de aplicaciones educativas.
+
+**Funcionalidades Actuales:**
+- Sistema de Login con JWT
+- Modelo de Usuario con JPA
+- Endpoints de autenticación
+
+**En Desarrollo:**
+- Pantalla de Inscripciones
+- Gestión completa de usuarios
+- Consulta de calificaciones
+
+## Soporte y Contribución
+
+¿Tienes preguntas o quieres contribuir? Visita nuestro [repositorio en GitHub](https://github.com/Yurben-bit/Sistema-de-Administraci-n-Escolar-Backend) para reportar issues o enviar pull requests.

@@ -1,0 +1,194 @@
+---
+title: 'Development Setup'
+description: 'Set up your local development environment for the EduTec Backend'
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+<Steps>
+  <Step title="Java Development Kit (JDK) 8">
+    The project requires Java 8. Download and install from [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html) or use OpenJDK.
+    
+    Verify installation:
+    ```bash
+    java -version
+    # Should output: java version "1.8.0_xxx"
+    ```
+  </Step>
+
+  <Step title="Maven 3.6+">
+    While the project includes Maven Wrapper, having Maven installed globally is recommended.
+    
+    ```bash
+    mvn -version
+    # Should output: Apache Maven 3.6.x or higher
+    ```
+    
+    <Note>
+      The project includes Maven Wrapper (`mvnw` and `mvnw.cmd`), so Maven installation is optional.
+    </Note>
+  </Step>
+
+  <Step title="MySQL 8.0+">
+    Install MySQL Server 8.0 or higher for production-like development.
+    
+    - [MySQL Community Server Download](https://dev.mysql.com/downloads/mysql/)
+    - Alternative: Use H2 in-memory database for quick development (already included)
+  </Step>
+
+  <Step title="Git">
+    For cloning the repository and version control.
+    
+    ```bash
+    git --version
+    ```
+  </Step>
+</Steps>
+
+## IDE Recommendations
+
+Choose one of these IDEs for the best development experience:
+
+### IntelliJ IDEA (Recommended)
+- **Community Edition** (free) or **Ultimate Edition**
+- Built-in Spring Boot support
+- Excellent Maven integration
+- Best Java debugging experience
+
+### Eclipse IDE
+- Install **Spring Tools 4** plugin for Spring Boot support
+- Free and open source
+- Good Maven integration via M2Eclipse
+
+### Visual Studio Code
+- Install extensions:
+  - **Spring Boot Extension Pack**
+  - **Extension Pack for Java**
+  - **Maven for Java**
+- Lightweight and fast
+
+## Cloning the Repository
+
+Clone the EduTec Backend repository to your local machine:
+
+<CodeGroup>
+```bash HTTPS
+git clone https://github.com/Yurben-bit/Sistema-de-Administraci-n-Escolar-Backend.git
+cd Sistema-de-Administraci-n-Escolar-Backend
+```
+
+```bash SSH
+git clone git@github.com:Yurben-bit/Sistema-de-Administraci-n-Escolar-Backend.git
+cd Sistema-de-Administraci-n-Escolar-Backend
+```
+</CodeGroup>
+
+## Project Structure
+
+The project follows a standard Spring Boot / Maven structure:
+
+```
+edutec-backend/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/tecmilenio/edutec/
+│   │   │       ├── EdutecApplication.java    # Main application class
+│   │   │       ├── controller/               # REST API controllers
+│   │   │       │   └── AuthController.java
+│   │   │       ├── dto/                      # Data Transfer Objects
+│   │   │       │   └── LoginRequest.java
+│   │   │       ├── model/                    # JPA entities
+│   │   │       └── security/                 # Security & JWT configuration
+│   │   │           └── JwtService.java
+│   │   └── resources/
+│   │       ├── application.properties        # Application configuration
+│   │       └── static/                       # Static resources
+│   └── test/                                 # Test classes
+├── mvnw                                      # Maven Wrapper (Unix)
+├── mvnw.cmd                                  # Maven Wrapper (Windows)
+├── pom.xml                                   # Maven configuration
+└── README.md
+```
+
+### Key Directories
+
+- **`controller/`**: REST API endpoints and request handlers
+- **`dto/`**: Data Transfer Objects for API requests/responses
+- **`model/`**: JPA entity classes mapped to database tables
+- **`security/`**: Authentication, authorization, and JWT token handling
+- **`resources/`**: Configuration files and static assets
+
+## Installing Dependencies
+
+Install all project dependencies using Maven Wrapper:
+
+<CodeGroup>
+```bash Linux/Mac
+./mvnw clean install
+```
+
+```bash Windows (CMD)
+mvnw.cmd clean install
+```
+
+```bash Windows (PowerShell)
+.\mvnw.cmd clean install
+```
+</CodeGroup>
+
+This command will:
+- Download all dependencies specified in `pom.xml`
+- Compile the source code
+- Run tests
+- Package the application
+
+<Tip>
+  Use `./mvnw clean install -DskipTests` to skip tests during the initial setup for faster installation.
+</Tip>
+
+## Key Dependencies
+
+The project includes the following major dependencies:
+
+| Dependency | Version | Purpose |
+|------------|---------|----------|
+| Spring Boot | 2.6.6 | Core framework |
+| Spring Data JPA | 2.6.6 | Database persistence |
+| MySQL Connector | 8.0.19 | MySQL database driver |
+| H2 Database | Runtime | In-memory database for development |
+| JWT (jjwt) | 0.11.5 | JSON Web Token authentication |
+| Lombok | Latest | Reduce boilerplate code |
+| Hibernate Search | 5.11.8 | Full-text search capabilities |
+| Spring Boot DevTools | Runtime | Hot reload during development |
+| Springfox Swagger | 2.4.0 | API documentation |
+
+## Verifying the Setup
+
+After installation, verify your setup:
+
+```bash
+# Check Maven Wrapper is working
+./mvnw -version
+
+# Verify dependencies are downloaded
+./mvnw dependency:tree
+
+# Compile the project
+./mvnw compile
+```
+
+If all commands succeed without errors, your development environment is ready!
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/configuration">
+    Configure database connections and environment variables
+  </Card>
+  <Card title="Running Locally" icon="play" href="/running-locally">
+    Start the application and test endpoints
+  </Card>
+</CardGroup>

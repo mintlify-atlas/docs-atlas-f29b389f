@@ -1,0 +1,83 @@
+---
+title: "Login"
+api: "POST /auth/login"
+description: "Authenticate user and receive JWT token"
+---
+
+The login endpoint authenticates a user and returns a JWT (JSON Web Token) that can be used for subsequent authenticated requests. The token is generated using the HS256 signing algorithm and is valid for 10 hours from the time of issuance.
+
+## Implementation Details
+
+The endpoint is implemented in `AuthController.java:16` and uses the `JwtService` to generate tokens. The JWT includes:
+- **Subject**: The username
+- **Issued At**: Current timestamp
+- **Expiration**: 10 hours from issuance (36,000,000 milliseconds)
+- **Signature Algorithm**: HS256
+
+## Request Body
+
+<ParamField path="username" type="string" required>
+  The username for authentication. This will be set as the subject claim in the JWT token.
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  The user's password for authentication.
+</ParamField>
+
+## Response
+
+<ResponseField name="token" type="string">
+  A JWT token string that can be used for authenticating subsequent API requests. The token expires 10 hours after generation.
+</ResponseField>
+
+## Success Response
+
+**Status Code**: `200 OK`
+
+The endpoint returns a plain string containing the JWT token.
+
+## Example Request
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "user@example.com",
+    "password": "password123"
+  }'
+```
+
+## Example Response
+
+```json
+"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQxNzQ2MDAwLCJleHAiOjE3NDE3ODIwMDB9.Xj8kQ9Z5vN2xK3pL7wR1mY6tH8sF4dG9cA5bE3nM2oP"
+```
+
+## Code Reference
+
+The login controller (`AuthController.java:16-18`):
+```java
+@PostMapping("/login")
+public String login(@RequestBody LoginRequest loginRequest) {
+    System.out.println("El usuario " + loginRequest.getUsername() + " está intentando entrar");
+    return jwtService.generateToken(loginRequest.getUsername());
+}
+```
+
+Token generation logic (`JwtService.java:19-27`):
+```java
+public String generateToken(String username) {
+    return Jwts.builder()
+            .setSubject(username)
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+            .signWith(KEY, SignatureAlgorithm.HS256)
+            .compact();
+}
+```
+
+## Notes
+
+- The current implementation does not validate the password against a database
+- The token expiration is set to 10 hours (configurable in `JwtService.java:23`)
+- The endpoint logs authentication attempts to the console

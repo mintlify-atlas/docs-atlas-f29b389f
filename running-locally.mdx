@@ -1,0 +1,419 @@
+---
+title: 'Running Locally'
+description: 'Start and test the EduTec Backend on your local machine'
+---
+
+## Running with Maven
+
+The simplest way to run the application is using Maven Wrapper:
+
+<CodeGroup>
+```bash Linux/Mac
+./mvnw spring-boot:run
+```
+
+```bash Windows (CMD)
+mvnw.cmd spring-boot:run
+```
+
+```bash Windows (PowerShell)
+.\mvnw.cmd spring-boot:run
+```
+</CodeGroup>
+
+The application will start on **`http://localhost:8080`**
+
+<Note>
+  The first run may take longer as Maven downloads dependencies.
+</Note>
+
+### With Specific Profile
+
+Run with a specific Spring profile:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+### With Environment Variables
+
+Pass environment variables at runtime:
+
+```bash
+JWT_SECRET="my-secure-secret" ./mvnw spring-boot:run
+```
+
+## Running from IDE
+
+### IntelliJ IDEA
+
+<Steps>
+  <Step title="Import the project">
+    - Open IntelliJ IDEA
+    - Select **File → Open**
+    - Navigate to the project directory and select `pom.xml`
+    - Choose **Open as Project**
+  </Step>
+
+  <Step title="Wait for Maven import">
+    IntelliJ will automatically import Maven dependencies. Wait for the process to complete.
+  </Step>
+
+  <Step title="Run the application">
+    - Navigate to `src/main/java/com/tecmilenio/edutec/EdutecApplication.java`
+    - Right-click on the file or the `main` method
+    - Select **Run 'EdutecApplication'**
+  </Step>
+
+  <Step title="Configure run settings (optional)">
+    - Click **Run → Edit Configurations**
+    - Set environment variables, VM options, or active profiles
+    - Example: Add `SPRING_PROFILES_ACTIVE=dev` to environment variables
+  </Step>
+</Steps>
+
+### Eclipse
+
+<Steps>
+  <Step title="Import Maven project">
+    - **File → Import → Maven → Existing Maven Projects**
+    - Browse to the project directory
+    - Click **Finish**
+  </Step>
+
+  <Step title="Run as Spring Boot App">
+    - Right-click on the project
+    - Select **Run As → Spring Boot App**
+  </Step>
+</Steps>
+
+### Visual Studio Code
+
+<Steps>
+  <Step title="Open the project folder">
+    - **File → Open Folder**
+    - Select the project directory
+  </Step>
+
+  <Step title="Install recommended extensions">
+    VS Code will prompt to install Java and Spring extensions. Accept the recommendations.
+  </Step>
+
+  <Step title="Run the application">
+    - Open `EdutecApplication.java`
+    - Click **Run** or **Debug** above the `main` method
+    - Or press `F5` to start debugging
+  </Step>
+</Steps>
+
+## Building the JAR
+
+Create an executable JAR file for deployment:
+
+```bash
+./mvnw clean package
+```
+
+This creates a JAR file at: `target/com.escolar-0.0.1-SNAPSHOT.jar`
+
+<Tip>
+  Use `-DskipTests` to skip tests during build: `./mvnw clean package -DskipTests`
+</Tip>
+
+### Running the JAR
+
+Once built, run the JAR directly:
+
+```bash
+java -jar target/com.escolar-0.0.1-SNAPSHOT.jar
+```
+
+With environment variables:
+
+```bash
+java -DJWT_SECRET="my-secret" -jar target/com.escolar-0.0.1-SNAPSHOT.jar
+```
+
+With Spring profile:
+
+```bash
+java -jar target/com.escolar-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
+## Accessing the Application
+
+Once the application starts, you'll see:
+
+```
+Started EdutecApplication in X.XXX seconds (JVM running for X.XXX)
+```
+
+The API is now available at:
+
+- **Base URL**: `http://localhost:8080`
+- **H2 Console** (if enabled): `http://localhost:8080/h2-console`
+- **Swagger UI** (if configured): `http://localhost:8080/swagger-ui.html`
+
+## Testing Endpoints
+
+### Using cURL
+
+Test the authentication endpoint:
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "testpass"
+  }'
+```
+
+**Expected Response**: A JWT token string
+
+```
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTcxMDQyMzQ1NiwiZXhwIjoxNzEwNDU5NDU2fQ...
+```
+
+### Using Postman
+
+<Steps>
+  <Step title="Create a new request">
+    - Method: **POST**
+    - URL: `http://localhost:8080/auth/login`
+  </Step>
+
+  <Step title="Set headers">
+    Add header:
+    ```
+    Content-Type: application/json
+    ```
+  </Step>
+
+  <Step title="Set request body">
+    Select **Body → raw → JSON** and enter:
+    ```json
+    {
+      "username": "testuser",
+      "password": "testpass"
+    }
+    ```
+  </Step>
+
+  <Step title="Send the request">
+    Click **Send** and view the JWT token in the response.
+  </Step>
+</Steps>
+
+### Using HTTPie
+
+A more user-friendly alternative to cURL:
+
+```bash
+http POST http://localhost:8080/auth/login username=testuser password=testpass
+```
+
+## Hot Reload with DevTools
+
+The project includes Spring Boot DevTools for automatic application restart during development.
+
+### How It Works
+
+- **Automatic Restart**: When you modify and save Java files, the application automatically restarts
+- **LiveReload**: Browser auto-refresh when static resources change (requires browser extension)
+- **Property Defaults**: Optimized default properties for development
+
+### Triggering a Restart
+
+<Steps>
+  <Step title="Make code changes">
+    Modify any Java file in your IDE
+  </Step>
+
+  <Step title="Save the file">
+    The application will detect changes and restart automatically
+  </Step>
+
+  <Step title="Wait for restart">
+    Watch the console for:
+    ```
+    Restarting due to changes to /path/to/YourFile.class
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  Changes to `pom.xml` or configuration files require a full manual restart.
+</Note>
+
+## Troubleshooting Common Issues
+
+### Port Already in Use
+
+**Error**: `Web server failed to start. Port 8080 was already in use.`
+
+**Solution 1**: Kill the process using port 8080
+
+<CodeGroup>
+```bash Linux/Mac
+lsof -ti:8080 | xargs kill -9
+```
+
+```bash Windows (CMD)
+netstat -ano | findstr :8080
+taskkill /PID <PID> /F
+```
+
+```bash Windows (PowerShell)
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess | Stop-Process
+```
+</CodeGroup>
+
+**Solution 2**: Change the port in `application.properties`
+
+```properties
+server.port=8081
+```
+
+### Database Connection Failed
+
+**Error**: `Cannot create PoolableConnectionFactory`
+
+**Solutions**:
+- Verify MySQL is running: `systemctl status mysql` (Linux) or check Services (Windows)
+- Check database credentials in `application.properties`
+- Ensure database exists: `CREATE DATABASE edutec;`
+- Switch to H2 for development (see [Configuration](/configuration))
+
+### JDBC Driver Not Found
+
+**Error**: `No suitable driver found for jdbc:mysql://...`
+
+**Solution**: Ensure MySQL connector dependency is in `pom.xml` and rebuild:
+
+```bash
+./mvnw clean install
+```
+
+### Java Version Mismatch
+
+**Error**: `Unsupported class file major version`
+
+**Solution**: Verify Java 8 is being used:
+
+```bash
+java -version
+echo $JAVA_HOME
+```
+
+Set `JAVA_HOME` if needed:
+
+<CodeGroup>
+```bash Linux/Mac
+export JAVA_HOME=/path/to/jdk1.8.0
+```
+
+```bash Windows
+set JAVA_HOME=C:\Path\To\jdk1.8.0
+```
+</CodeGroup>
+
+### Maven Build Failed
+
+**Error**: Various build errors
+
+**Solutions**:
+
+```bash
+# Clean Maven cache
+./mvnw dependency:purge-local-repository
+
+# Force update dependencies
+./mvnw clean install -U
+
+# Skip tests if they're failing
+./mvnw clean install -DskipTests
+```
+
+### Application Starts but Endpoints Return 404
+
+**Possible Causes**:
+- Controller not scanned by Spring Boot
+- Incorrect request mapping
+- Context path configured
+
+**Debug Steps**:
+
+1. Check application logs for registered mappings:
+```
+Mapped "{[/auth/login],methods=[POST]}" onto ...
+```
+
+2. Verify controller package is under `com.tecmilenio.edutec`
+
+3. Check if context path is set in `application.properties`
+
+### H2 Console Not Accessible
+
+**Solution**: Enable H2 console in `application.properties`:
+
+```properties
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+```
+
+## Performance Tips
+
+<Tip>
+  **Faster Builds**: Use `./mvnw clean package -DskipTests -Dmaven.test.skip=true` during active development.
+</Tip>
+
+<Tip>
+  **Reduce Startup Time**: Disable unused auto-configurations in `application.properties`:
+  ```properties
+  spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+  ```
+</Tip>
+
+<Tip>
+  **Debug Mode**: Run with debug logging to troubleshoot issues:
+  ```bash
+  ./mvnw spring-boot:run -Dspring-boot.run.arguments=--logging.level.root=DEBUG
+  ```
+</Tip>
+
+## Useful Development Commands
+
+```bash
+# Check dependencies
+./mvnw dependency:tree
+
+# Update dependencies
+./mvnw versions:display-dependency-updates
+
+# Run specific test class
+./mvnw test -Dtest=AuthControllerTest
+
+# Clean build artifacts
+./mvnw clean
+
+# Generate project report
+./mvnw site
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication API" icon="shield-halved" href="/api/auth/login">
+    Test the login endpoint
+  </Card>
+  <Card title="User Model" icon="user" href="/api/models/user">
+    Explore the User entity
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration">
+    Application configuration guide
+  </Card>
+  <Card title="Architecture" icon="diagram-project" href="/architecture">
+    Understand the system architecture
+  </Card>
+</CardGroup>

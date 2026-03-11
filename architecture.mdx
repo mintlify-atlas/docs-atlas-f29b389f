@@ -1,0 +1,271 @@
+---
+title: Architecture
+description: Understanding the EduTec Backend system architecture and design patterns
+---
+
+## Overview
+
+EduTec Backend is built on **Spring Boot 2.6.6** with **Java 8**, following a layered MVC (Model-View-Controller) architecture pattern. The application is designed for educational administration with RESTful API endpoints.
+
+## System Architecture
+
+The application follows a traditional layered architecture that separates concerns and promotes maintainability:
+
+```
+┌─────────────────────────────────────┐
+│      Client Application             │
+│      (Frontend/Mobile)              │
+└─────────────┬───────────────────────┘
+              │ HTTP/REST
+              ▼
+┌─────────────────────────────────────┐
+│      Controller Layer               │
+│   (AuthController, etc.)            │
+│   • Request handling                │
+│   • Response formatting             │
+│   • Input validation                │
+└─────────────┬───────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────┐
+│      Service Layer                  │
+│   (JwtService, etc.)                │
+│   • Business logic                  │
+│   • Token generation                │
+│   • Data processing                 │
+└─────────────┬───────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────┐
+│      Repository Layer               │
+│   (Spring Data JPA)                 │
+│   • Database operations             │
+│   • Query execution                 │
+└─────────────┬───────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────┐
+│      Database                       │
+│   (MySQL/MariaDB/Oracle/MSSQL/H2)  │
+└─────────────────────────────────────┘
+```
+
+## Package Organization
+
+The codebase is organized into distinct packages following Spring Boot best practices:
+
+<Tabs>
+  <Tab title="controller">
+    **Location:** `com.tecmilenio.edutec.controller`
+    
+    Contains REST controllers that handle HTTP requests and responses.
+    
+    **Responsibilities:**
+    - Define API endpoints
+    - Validate incoming requests
+    - Return appropriate HTTP responses
+    - Delegate business logic to services
+    
+    **Example:** `AuthController.java` handles authentication endpoints
+  </Tab>
+  
+  <Tab title="model">
+    **Location:** `com.tecmilenio.edutec.model`
+    
+    Contains JPA entities that map to database tables.
+    
+    **Responsibilities:**
+    - Define database schema structure
+    - Establish relationships between entities
+    - Use JPA annotations for ORM mapping
+    
+    **Example:** `User.java` represents the usuarios table
+  </Tab>
+  
+  <Tab title="dto">
+    **Location:** `com.tecmilenio.edutec.dto`
+    
+    Data Transfer Objects for request/response payloads.
+    
+    **Responsibilities:**
+    - Structure API request bodies
+    - Validate input data
+    - Decouple external API from internal models
+    
+    **Example:** `LoginRequest.java` captures login credentials
+  </Tab>
+  
+  <Tab title="security">
+    **Location:** `com.tecmilenio.edutec.security`
+    
+    Security-related components including JWT handling.
+    
+    **Responsibilities:**
+    - Token generation and validation
+    - Authentication logic
+    - Security configuration
+    
+    **Example:** `JwtService.java` manages JWT tokens
+  </Tab>
+</Tabs>
+
+## Technology Stack
+
+The project leverages a comprehensive set of Spring Boot and Java ecosystem libraries:
+
+### Core Framework
+
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.6.6</version>
+</parent>
+```
+
+**Java Version:** 1.8
+
+### Key Dependencies
+
+<Accordion title="Data Access & Persistence">
+  **Spring Data JPA** - Object-Relational Mapping and repository abstraction
+  
+  **Spring Data JDBC** - Direct JDBC access when needed
+  
+  **Hibernate 5.x** - JPA implementation with advanced features:
+  - `hibernate-agroal` (5.4.30.Final) - Connection pooling
+  - `hibernate-search-orm` (5.11.8.Final) - Full-text search capabilities
+  - `hibernate-validator` (7.0.1.Final) - Bean validation
+  - `hibernate-envers` (5.5.0.Final) - Entity auditing and versioning
+  
+  **Spring Data Envers** (2.5.1) - Integration layer for audit trails
+</Accordion>
+
+<Accordion title="Database Drivers">
+  The application supports multiple database systems:
+  
+  - **MySQL** (8.0.19) - Primary production database
+  - **MariaDB** - MySQL-compatible alternative
+  - **Oracle JDBC** (21.5.0.0) - Enterprise database support
+  - **MS SQL Server** - Microsoft database support
+  - **H2** - In-memory database for development/testing
+</Accordion>
+
+<Accordion title="Security & Authentication">
+  **JWT (JSON Web Tokens)** - Stateless authentication using `io.jsonwebtoken` (0.11.5):
+  - `jjwt-api` - Core JWT API
+  - `jjwt-impl` - Implementation library
+  - `jjwt-jackson` - JSON processing
+  
+  **TOTP** (de.taimos:totp:1.0) - Time-based one-time password support
+  
+  **Commons Codec** (1.10) - Encoding utilities
+  
+  <Note>
+  Spring Security starter is currently commented out in `pom.xml:103-106`, indicating a custom lightweight authentication implementation.
+  </Note>
+</Accordion>
+
+<Accordion title="Web & API">
+  **Spring Boot Starter Web** - RESTful web services
+  
+  **Spring Boot Starter Mail** - Email functionality
+  
+  **Tomcat Embed Jasper** - JSP support (provided scope)
+  
+  **Springfox Swagger** (2.4.0) - API documentation:
+  - `springfox-swagger2` - OpenAPI specification
+  - `springfox-swagger-ui` - Interactive documentation UI
+  
+  **Spring REST Docs** (2.0.6) - Test-driven documentation
+</Accordion>
+
+<Accordion title="Utilities & Development">
+  **Lombok** - Boilerplate code reduction (@Data, @NoArgsConstructor, etc.)
+  
+  **Dozer** (5.5.1) - Bean mapping and transformation
+  
+  **Spring DevTools** - Hot reload during development
+  
+  **Spring Session JDBC** - Distributed session management
+  
+  **ZXing** (3.2.1) - QR code generation (javase)
+  
+  **CGLIB** (3.3.0) - Bytecode generation for proxies
+  
+  **JAXB API** (2.3.0) - XML binding for Java 8+
+</Accordion>
+
+## Application Structure
+
+The Spring Boot application follows the standard project structure:
+
+```
+com.tecmilenio.edutec/
+├── controller/          # REST API endpoints
+│   └── AuthController.java
+├── dto/                 # Request/Response objects
+│   └── LoginRequest.java
+├── model/               # JPA entities
+│   └── User.java
+├── security/            # Security components
+│   └── JwtService.java
+├── repository/          # Data access layer (Spring Data JPA)
+├── service/             # Business logic layer
+└── config/              # Configuration classes
+```
+
+<Info>
+**Application Name:** `edutec` (defined in `application.properties:1`)
+
+**Group ID:** `com.escolar`
+
+**Artifact ID:** `com.escolar`
+</Info>
+
+## Request Flow Example
+
+Here's how a typical authentication request flows through the system:
+
+1. **Client** sends POST request to `/auth/login` with credentials
+2. **AuthController** receives the request and extracts `LoginRequest` DTO
+3. **JwtService** generates a JWT token for the username
+4. **Controller** returns the token as a String response
+5. **Client** stores the token for subsequent authenticated requests
+
+```java
+// src/main/java/com/tecmilenio/edutec/controller/AuthController.java:15-19
+@PostMapping("/login")
+public String login(@RequestBody LoginRequest loginRequest) {
+    System.out.println("El usuario " + loginRequest.getUsername() + " está intentando entrar");
+    return jwtService.generateToken(loginRequest.getUsername());
+}
+```
+
+## Build Configuration
+
+The project uses **Maven** as its build tool with the following plugins:
+
+### Spring Boot Maven Plugin
+
+Packages the application as an executable JAR with embedded Tomcat server. Excludes Lombok from the final artifact.
+
+### Asciidoctor Maven Plugin
+
+Generates HTML documentation from Asciidoc files during the `prepare-package` phase, integrating with Spring REST Docs.
+
+### Maven Resources Plugin
+
+Handles resource filtering and copying (version 3.1.0).
+
+<Warning>
+**Java Version Compatibility:** The project targets Java 1.8. Ensure your development environment uses Java 8 or a compatible version to avoid compilation issues.
+</Warning>
+
+## Next Steps
+
+Now that you understand the architecture, explore:
+
+- [Authentication](/authentication) - JWT implementation details
+- [Database](/database) - Data persistence and entity mapping
+- [API Reference](/api/auth/login) - Available endpoints

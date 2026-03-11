@@ -1,0 +1,145 @@
+---
+title: "User Model"
+description: "JPA entity representing system users in the EduTec application"
+---
+
+## Overview
+
+The `User` model is a JPA (Java Persistence API) entity that represents users in the EduTec system. It is mapped to the `usuarios` table in the database and uses Lombok annotations to reduce boilerplate code.
+
+## Database Mapping
+
+- **Table Name**: `usuarios`
+- **Primary Key**: `id` (auto-generated)
+- **Unique Constraints**: `username` must be unique
+
+## Fields
+
+<ResponseField name="id" type="Long" required>
+  Primary key identifier for the user. Auto-generated using the database's identity strategy.
+  
+  **Annotations**:
+  - `@Id` - Marks this field as the primary key
+  - `@GeneratedValue(strategy = GenerationType.IDENTITY)` - Database auto-generates values
+</ResponseField>
+
+<ResponseField name="username" type="String" required>
+  Unique username for the user account. Used for authentication and identification.
+  
+  **Constraints**:
+  - Not null
+  - Must be unique across all users
+  
+  **Annotations**:
+  - `@Column(nullable = false, unique = true)`
+</ResponseField>
+
+<ResponseField name="password" type="String" required>
+  Encrypted password for user authentication. Should be hashed before storage.
+  
+  **Constraints**:
+  - Not null
+  
+  **Annotations**:
+  - `@Column(nullable = false)`
+</ResponseField>
+
+## JPA Annotations
+
+### Entity Configuration
+
+- **`@Entity`** - Marks this class as a JPA entity that will be managed by the persistence context
+- **`@Table(name = "usuarios")`** - Maps this entity to the `usuarios` table in the database
+
+### Field Annotations
+
+- **`@Id`** - Designates the primary key field
+- **`@GeneratedValue(strategy = GenerationType.IDENTITY)`** - Configures automatic ID generation using the database's identity column
+- **`@Column`** - Specifies column constraints and properties
+  - `nullable = false` - Field cannot be null in the database
+  - `unique = true` - Field value must be unique across all records
+
+## Lombok Annotations
+
+The User model uses Lombok annotations to automatically generate common code:
+
+- **`@Data`** - Generates getters, setters, `toString()`, `equals()`, and `hashCode()` methods
+- **`@NoArgsConstructor`** - Generates a no-argument constructor (required by JPA)
+- **`@AllArgsConstructor`** - Generates a constructor with all fields as parameters
+
+## Usage Example
+
+```java
+// Creating a new user
+User user = new User();
+user.setUsername("john.doe");
+user.setPassword("hashedPassword123");
+
+// Using the all-args constructor
+User user = new User(null, "john.doe", "hashedPassword123");
+
+// Accessing fields
+String username = user.getUsername();
+Long userId = user.getId();
+```
+
+## Related Endpoints
+
+- [POST /auth/login](/api/auth/login) - Uses User model for authentication
+
+## Related Models
+
+- [LoginRequest](/api/models/login-request) - DTO used for user authentication
+
+## Source Code
+
+```java
+package com.tecmilenio.edutec.model;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "usuarios")
+@Data // Genera Getters y Setters
+@NoArgsConstructor // Constructor sin argumentos (Obligatorio para JPA)
+@AllArgsConstructor // Constructor con todos los argumentos
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+}
+```
+
+## Database Table Structure
+
+```sql
+CREATE TABLE usuarios (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+```
+
+## Security Considerations
+
+<Warning>
+  The password field should **never** store plain text passwords. Always use a secure hashing algorithm (such as BCrypt) before saving passwords to the database.
+</Warning>
+
+## Best Practices
+
+1. **Password Hashing**: Always hash passwords using Spring Security's `PasswordEncoder` before persisting
+2. **Validation**: Consider adding `@NotBlank` and `@Size` annotations from `javax.validation` for input validation
+3. **Security**: Never expose password fields in API responses; use DTOs to transfer user data
+4. **Indexing**: The `username` field has a unique constraint, which automatically creates an index for efficient lookups
