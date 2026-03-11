@@ -1,0 +1,73 @@
+{
+  "projectType": "api-service",
+  "projectName": "EduTec Backend",
+  "projectDescription": "Sistema backend para la administración educativa con autenticación JWT, gestión de usuarios, inscripciones y consulta académica",
+  "theme": "linden",
+  "primaryColor": "#0066CC",
+  "lightColor": "#3399FF",
+  "darkColor": "#004499",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "architecture",
+              "authentication",
+              "database"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "setup",
+              "configuration",
+              "running-locally"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/auth/login"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "api/models/user",
+              "api/models/login-request"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "JWT-based authentication and authorization",
+    "User management with role-based access (students, teachers, administrators)",
+    "Student enrollment management system",
+    "Academic information and grade consultation",
+    "Multi-database support (MySQL, PostgreSQL, Oracle, H2)",
+    "RESTful API with Swagger documentation"
+  ],
+  "publicApiSurface": [
+    "POST /auth/login - Authenticate user and generate JWT token",
+    "User model - JPA entity for user data",
+    "LoginRequest DTO - Authentication request payload",
+    "JwtService - Token generation and validation service"
+  ]
+}
