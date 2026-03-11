@@ -9,7 +9,7 @@ EduTec Backend is built on **Spring Boot 2.6.6** with **Java 8**, following a la
 
 ## System Architecture
 
-The application follows a traditional layered architecture that separates concerns and promotes maintainability:
+The application currently follows a simplified layered architecture. The system is in early development with basic authentication functionality:
 
 ```
 ┌─────────────────────────────────────┐
@@ -20,27 +20,29 @@ The application follows a traditional layered architecture that separates concer
               ▼
 ┌─────────────────────────────────────┐
 │      Controller Layer               │
-│   (AuthController, etc.)            │
+│   (AuthController)                  │
 │   • Request handling                │
 │   • Response formatting             │
-│   • Input validation                │
+│   • Delegates to services           │
 └─────────────┬───────────────────────┘
               │
               ▼
 ┌─────────────────────────────────────┐
 │      Service Layer                  │
-│   (JwtService, etc.)                │
-│   • Business logic                  │
+│   (JwtService)                      │
 │   • Token generation                │
-│   • Data processing                 │
-└─────────────┬───────────────────────┘
-              │
-              ▼
+│   • JWT signing & expiration        │
+└─────────────────────────────────────┘
+
+Note: Database integration and repository layer 
+are configured via dependencies but not yet 
+implemented in the current codebase.
+
+Planned Architecture:
 ┌─────────────────────────────────────┐
-│      Repository Layer               │
-│   (Spring Data JPA)                 │
-│   • Database operations             │
-│   • Query execution                 │
+│   Repository Layer (Future)         │
+│   • User authentication             │
+│   • Data persistence                │
 └─────────────┬───────────────────────┘
               │
               ▼
